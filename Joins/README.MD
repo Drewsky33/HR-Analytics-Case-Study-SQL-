@@ -36,15 +36,19 @@ INNER JOIN mv_employees.department_employee
 -- NOTE: department is joined only to the department_employee table!
 INNER JOIN mv_employees.department
   ON department_employee.department_id = department.id;
-  
+ 
 -- Inspecting table
 
 SELECT
   COUNT(*) AS row_count
 FROM naive_join_table;
 
+```
 
-There seems to be a difference between the original table and the counts for this new table created from joining information. I'm going to inspect individuals and try to see what's going on. 
+
+There seems to be a difference between the original table and the counts for this new table created from joining information. I'm going to inspect individuals and try to see what's going on.
+
+``` sql
 
 -- Inspecting individuals
 SELECT *
@@ -52,7 +56,11 @@ FROM naive_join_table
 WHERE id = 10001
 ORDER BY salary_to_date DESC;
 
+```
+
 There's a little too much information in this view. I'm going to have a look at another employee.
+
+``` sql
 
 -- Look at another employee
 SELECT *
@@ -60,15 +68,25 @@ FROM naive_join_table
 WHERE id = 11669
 ORDER BY salary_to_date DESC;
 
+```
+
 It looks like there are some duplicates happening here. I'm going to zoom in on the salary_to_date column and see what's going on. 
+
+
+```sql
 
 -- Let's look further
 SELECT *
 FROM naive_join_table
 WHERE id = 11669
   AND salary_to_date = '9999-01-01';
-  
+ ```
+ 
+ 
  It looks like the employee has been listed in two different apartments. Additionally, the employee has two different titles at the same time. This is due to the date information creating duplicate entries in the table. 
+ 
+ 
+ ``` sql
  
  -- Filter for the information to be the same across the table. 
  SELECT *
@@ -77,9 +95,14 @@ WHERE id = 11669
   AND salary_to_date = '9999-01-01'
   AND title_to_date = '9999-01-01'
   AND dept_to_date = '9999-01-01';
-  
+ 
+ ```
+ 
  
  So that where filter seems to have worked. We'll incorporate that into the join stage so that we won't have duplicate entries. 
+ 
+ 
+ ``` sql
  
  -- Creating the current join table
 DROP TABLE IF EXISTS current_join_table;
@@ -119,12 +142,14 @@ INNER JOIN mv_employees.department
 WHERE salary.to_date = '9999-01-01'
   AND title.to_date = '9999-01-01'
   AND department_employee.to_date = '9999-01-01';
-  
-  -- Let's look at the counts to see if it matches the values in the original table
+ 
+ 
+-- Let's look at the counts to see if it matches the values in the original table
 SELECT
   COUNT(*) AS row_count
 FROM current_join_table;
 
+```
 
-It looks like the information is what we want.
-  
+It looks like the join worked. The amount of rows is the same as we had originally wanted. 
+
